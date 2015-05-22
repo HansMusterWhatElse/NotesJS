@@ -48,6 +48,7 @@
     <Content Include="index.html" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="index2.html" />
     <Content Include="web.config" />
     <None Include="web.Debug.config">
       <DependentUpon>web.config</DependentUpon>
