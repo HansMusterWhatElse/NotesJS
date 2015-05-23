@@ -6,6 +6,14 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
     <link href="css/style.css" rel="stylesheet" />
+    <!--
+    ----------------------
+    My ToDo's
+    ----------------------
+    0) Change priority Selection => 3 radio buttons with a picture
+    1) Change color depening on the due date (red, orange, green)
+    2) Show all or just pending Notes => hack near the Status Column?
+    -->
 </head>
 <body id="home">
     <!-- Header -->
@@ -27,7 +35,7 @@
                     </div>
                     <div id="navbar" class="navbar-collapse collapse">
                         <ul class="nav navbar-nav">
-                            <li class="active"><a href="#">Notes</a></li>
+                            <!--<li class="active"><a href="#">Notes</a></li>-->
                             <!--<li class="dropdown">
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Dropdown <span class="caret"></span></a>
                                 <ul class="dropdown-menu" role="menu">
@@ -50,31 +58,116 @@
                     </div><!--/.nav-collapse -->
                 </div><!--/.container-fluid -->
             </nav>
-
-            <!-- Panel -->
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    Notes
-                </div>
-                <div class="panel-body">
-                    <div class="btn-group">
-                        <button type="button" class="btn btn-default btn-sm sort-button">By Finish Date</button>
-                        <button type="button" class="btn btn-default btn-sm sort-button">By created Date</button>
-                        <button type="button" class="btn btn-default btn-sm sort-button">By Importance</button>
-                    </div>
-                    <!-- Content -->
-                    <div>
-
-                    </div> <!--Content -->
-                </div>
-            </div>
-
         </section>
-
     </header>
-    <section class="container"></section><!--container-->
+
+    <section class="container">
+        <!--Create Note-->
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <span class="glyphicon glyphicon-file icon"></span>
+                Create Note
+            </div>
+            <div class="panel-body">
+                <form role="form">
+                    <div class="form-group">
+                        <label for="title">Title:</label>
+                        <input class="form-control" id="title">
+                    </div>
+                    <div class="form-group">
+                        <label for="desc">Description:</label>
+                        <textarea  class="form-control" id="desc"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="sel1">Priority:</label>
+                        <select class="form-control" id="priority">
+                            <option>1</option>
+                            <option>2</option>
+                            <option>3</option>
+                            <option>4</option>
+                        </select>
+                    </div>
+                    <div>
+                        <!-- Upload attachement -->
+                    </div>
+                    <button type="submit" class="btn btn-default">Submit</button>
+                    
+                </form>
+            </div>
+        </div>
+
+        <!-- Display Notes -->
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <span class="glyphicon glyphicon-list-alt icon"></span>
+                Notes
+            </div>
+            <div class="panel-body">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Status</th>
+                        <th>Due</th>
+                        <th>Creation</th>
+                        <th>Importance</th>
+                        <th>Description</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td><span class="glyphicon glyphicon-ok icon"></span></td>
+                        <td>10.02.2016</td>
+                        <td>10.02.2016</td>
+                        <td>Icon1</td>
+                        <td>In post mean shot ye. There out her child sir his lived. Design at uneasy me seaso</td>
+                        <td>
+                            <a href="#" class="icon">
+                                <span class="glyphicon glyphicon-pencil"></span>
+                            </a>
+                            <a href="#" class="icon">
+                                <span class="glyphicon glyphicon-trash"></span>
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><span class="glyphicon glyphicon-ok icon"></span></td>
+                        <td>10.02.2016</td>
+                        <td>10.02.2016</td>
+                        <td>Icon2</td>
+                        <td>zealously his shy own belonging. Always length letter adieus add number moment she. Promise few compass six several old office</td>
+                        <td>
+                            <a href="#" class="icon">
+                                <span class="glyphicon glyphicon-pencil"></span>
+                            </a>
+                            <a href="#" class="icon">
+                                <span class="glyphicon glyphicon-trash"></span>
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><span class="glyphicon glyphicon-remove icon"></span></td>
+                        <td>10.02.2016</td>
+                        <td>10.02.2016</td>
+                        <td>Icon3</td>
+                        <td>interested. Described deficient applauded consisted my me do. Passed edward two talent effect seemed engage six</td>
+                        <td>
+                            <a href="#" class="icon">
+                                <span class="glyphicon glyphicon-pencil"></span>
+                            </a>
+                            <a href="#" class="icon">
+                                <span class="glyphicon glyphicon-trash"></span>
+                            </a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+</section><!--container-->
+
     <footer></footer>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
 </body>
 </html>
