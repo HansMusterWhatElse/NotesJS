@@ -1,0 +1,55 @@
+﻿/* Bootstrap specific*/
+
+header .jumbotron {
+    background: url('../images/cityheader.jpg');
+    background-position: center center;
+}
+.jumbotron {
+     min-height: 250px;
+}
+.jumbotron h1 {
+    color: #FFFFFF;
+    font-size: 75px;
+}
+
+.btn-file {
+    position: relative;
+    overflow: hidden;
+}
+    .btn-file input[type=file] {
+        position: absolute;
+        top: 0;
+        right: 0;
+        min-width: 100%;
+        min-height: 100%;
+        font-size: 100px;
+        text-align: right;
+        filter: alpha(opacity=0);
+        opacity: 0;
+        outline: none;
+        background: white;
+        cursor: inherit;
+        display: block;
+    }
+
+/*General */
+body {
+    
+}
+
+.upload-drop-zone {
+    height: 150px;
+    border: 2px dashed #ccc;
+    margin-bottom: 20px;
+    color: #ccc;
+    line-height: 150px;
+    text-align: center;
+}
+
+.sort-button {
+    margin: 0 10px 0 0;
+}
+span.icon  {
+    margin: 0 5px 0 0;
+}
+

@@ -3,9 +3,10 @@
 <head>
     <title></title>
     <meta charset="utf-8" />
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
-    <link href="css/style.css" rel="stylesheet" />
+    <link href="Content/bootstrap.min.css" rel="stylesheet" />
+    <link href="Content/bootstrap-theme.min.css" rel="stylesheet" />
+    <link href="Content/bootstrap-datetimepicker.css" rel="stylesheet" />
+    <link href="Content/style.css" rel="stylesheet" />
     <!--
     ----------------------
     My ToDo's
@@ -13,6 +14,12 @@
     0) Change priority Selection => 3 radio buttons with a picture
     1) Change color depening on the due date (red, orange, green)
     2) Show all or just pending Notes => hack near the Status Column?
+    3) Export function (xml/json)
+    4) Autosave function
+    5) File upload function (add icons (file, image, etc.) to the output)
+    5.1) If allready an existing attachement => add
+    5.2) Add remove button for a file
+    6) Move note.init() to a more suitable location
     -->
 </head>
 <body id="home">
@@ -69,29 +76,42 @@
                 Create Note
             </div>
             <div class="panel-body">
-                <form role="form">
+                <form id="note-form" role="form">
                     <div class="form-group">
                         <label for="title">Title:</label>
-                        <input class="form-control" id="title">
+                        <input name="title" class="form-control" id="title">
                     </div>
                     <div class="form-group">
                         <label for="desc">Description:</label>
-                        <textarea  class="form-control" id="desc"></textarea>
+                        <textarea name="desc" class="form-control" id="desc" rows="6"></textarea>
                     </div>
                     <div class="form-group">
-                        <label for="sel1">Priority:</label>
-                        <select class="form-control" id="priority">
-                            <option>1</option>
-                            <option>2</option>
-                            <option>3</option>
-                            <option>4</option>
-                        </select>
+                        <label>Priority:</label>
+                        <div class="radio">
+                            <label><input type="radio" name="optpriority"><span class="glyphicon glyphicon-circle-arrow-up icon"></span>High</label>
+                        </div>
+                        <div class="radio">
+                            <label><input type="radio" name="optpriority"><span class="glyphicon glyphicon-circle-arrow-left icon"></span>Medium</label>
+                        </div>
+                        <div class="radio">
+                            <label><input type="radio" name="optpriority"><span class="glyphicon glyphicon-circle-arrow-down icon"></span>Low</label>
+                        </div>
                     </div>
-                    <div>
-                        <!-- Upload attachement -->
+                    <div class="form-group">
+                        <label>Due Date:</label>
+                        <div class="input-group date" id="datetimepicker">
+                            <input name="duedate" type="text" class="form-control" />
+                            <span class="input-group-addon">
+                                <span class="glyphicon glyphicon-calendar"></span>
+                            </span>
+                        </div>
                     </div>
-                    <button type="submit" class="btn btn-default">Submit</button>
-                    
+                    <div form-group>
+                        <label>Attachements:</label>
+                        <div name="upload-drop-zone" class="upload-drop-zone">Drag & Drop your attachements here</div>
+                        <output id="upload-output"></output>
+                    </div>
+                    <button type="submit" class="btn btn-default">Save</button>
                 </form>
             </div>
         </div>
@@ -105,69 +125,186 @@
             <div class="panel-body">
                 <table class="table">
                     <thead>
-                    <tr>
-                        <th>Status</th>
-                        <th>Due</th>
-                        <th>Creation</th>
-                        <th>Importance</th>
-                        <th>Description</th>
-                        <th>Actions</th>
-                    </tr>
+                        <tr>
+                            <th>Status</th>
+                            <th>Due</th>
+                            <th>Creation</th>
+                            <th>Importance</th>
+                            <th>Description</th>
+                            <th>Actions</th>
+                        </tr>
                     </thead>
                     <tbody>
-                    <tr>
-                        <td><span class="glyphicon glyphicon-ok icon"></span></td>
-                        <td>10.02.2016</td>
-                        <td>10.02.2016</td>
-                        <td>Icon1</td>
-                        <td>In post mean shot ye. There out her child sir his lived. Design at uneasy me seaso</td>
-                        <td>
-                            <a href="#" class="icon">
-                                <span class="glyphicon glyphicon-pencil"></span>
-                            </a>
-                            <a href="#" class="icon">
-                                <span class="glyphicon glyphicon-trash"></span>
-                            </a>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><span class="glyphicon glyphicon-ok icon"></span></td>
-                        <td>10.02.2016</td>
-                        <td>10.02.2016</td>
-                        <td>Icon2</td>
-                        <td>zealously his shy own belonging. Always length letter adieus add number moment she. Promise few compass six several old office</td>
-                        <td>
-                            <a href="#" class="icon">
-                                <span class="glyphicon glyphicon-pencil"></span>
-                            </a>
-                            <a href="#" class="icon">
-                                <span class="glyphicon glyphicon-trash"></span>
-                            </a>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><span class="glyphicon glyphicon-remove icon"></span></td>
-                        <td>10.02.2016</td>
-                        <td>10.02.2016</td>
-                        <td>Icon3</td>
-                        <td>interested. Described deficient applauded consisted my me do. Passed edward two talent effect seemed engage six</td>
-                        <td>
-                            <a href="#" class="icon">
-                                <span class="glyphicon glyphicon-pencil"></span>
-                            </a>
-                            <a href="#" class="icon">
-                                <span class="glyphicon glyphicon-trash"></span>
-                            </a>
-                        </td>
-                    </tr>
+                        <tr>
+                            <td><span class="glyphicon glyphicon-ok icon"></span></td>
+                            <td>10.02.2016</td>
+                            <td>10.02.2016</td>
+                            <td>Icon1</td>
+                            <td>In post mean shot ye. There out her child sir his lived. Design at uneasy me seaso</td>
+                            <td>
+                                <a href="#" class="icon">
+                                    <span class="glyphicon glyphicon-pencil"></span>
+                                </a>
+                                <a href="#" class="icon">
+                                    <span class="glyphicon glyphicon-trash"></span>
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="glyphicon glyphicon-ok icon"></span></td>
+                            <td>10.02.2016</td>
+                            <td>10.02.2016</td>
+                            <td>Icon2</td>
+                            <td>zealously his shy own belonging. Always length letter adieus add number moment she. Promise few compass six several old office</td>
+                            <td>
+                                <a href="#" class="icon">
+                                    <span class="glyphicon glyphicon-pencil"></span>
+                                </a>
+                                <a href="#" class="icon">
+                                    <span class="glyphicon glyphicon-trash"></span>
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="glyphicon glyphicon-remove icon"></span></td>
+                            <td>10.02.2016</td>
+                            <td>10.02.2016</td>
+                            <td>Icon3</td>
+                            <td>interested. Described deficient applauded consisted my me do. Passed edward two talent effect seemed engage six</td>
+                            <td>
+                                <a href="#" class="icon">
+                                    <span class="glyphicon glyphicon-pencil"></span>
+                                </a>
+                                <a href="#" class="icon">
+                                    <span class="glyphicon glyphicon-trash"></span>
+                                </a>
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
         </div>
-</section><!--container-->
+    </section><!--container-->
 
     <footer></footer>
-    <script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+    <script src="Scripts/jquery-1.9.0.min.js"></script>
+    <script src="Scripts/bootstrap.min.js"></script>
+    <script src="Scripts/moment.min.js"></script>
+    <script src="Scripts/bootstrap-datetimepicker.min.js"></script>
+    <script>
+        $(function () {
+            $('#datetimepicker').datetimepicker({
+                // http://momentjs.com/docs/#/displaying/format/
+
+            });
+
+            // Drag & Drop for attachements
+            var $dragzone = $(".upload-drop-zone");
+            var $uploadOutput = $('#upload-output');
+
+            $dragzone.on('dragenter', function (e) {
+                e.stopPropagation();
+                e.preventDefault();
+                $(this).css('border', '2px solid #ccc');
+            });
+            $dragzone.on('dragleave', function (e) {
+                e.stopPropagation();
+                e.preventDefault();
+                $(this).css('border', '2px dashed #ccc');
+            });
+            $dragzone.on('dragover', function (e) {
+                e.stopPropagation();
+                e.preventDefault();
+            });
+            $dragzone.on('drop', function (e) {
+                $(this).css('border', '2px dashed #ccc');
+                e.preventDefault();
+                var files = e.originalEvent.dataTransfer.files;
+                // Storing process
+                note.addAttachement(files, $dragzone);
+
+            });
+            $(document).on('dragenter', function (e) {
+                // Prevents the default action of the browser to open the file in the window
+                e.stopPropagation();
+                e.preventDefault();
+            });
+            $(document).on('dragover', function (e) {
+                // Prevents the default action of the browser to open the file in the window
+                e.stopPropagation();
+                e.preventDefault();
+            });
+            $(document).on('drop', function (e) {
+                // Prevents the default action of the browser to open the file in the window
+                e.stopPropagation();
+                e.preventDefault();
+            });
+
+            $('button.btn.btn-default').on('click', function () {
+                var formData = $("#note-form").serialize();
+                note.serialize(formData);
+            });
+
+            var utility = {
+                createGuid: function () {
+                    'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                        var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+                        return v.toString(16);
+                    });
+                }
+            };
+
+            function NoteObject(id){
+                this.uid = id;
+                this.attachements = [];
+                this.serializedFormData = "";
+            };
+
+            var note = {
+                counter: 1,
+                output: [],
+                init : function() {
+                    this.currentWorkingObject = new NoteObject(utility.createGuid());
+                },
+                addAttachement: function (files, obj) {
+                    // Display a message concerning the selected files & store the file in the local storage
+                    for (var i = 0, f; f = files[i]; i++) {
+                        var fileReader = new FileReader();
+                        fileReader.onload = (function (file, curObject) {
+                            return function (evt) {
+                                // Read out file contents as a data URL => result => base64 encoded data string
+                                var base64File = evt.target.result;
+                                curObject.attachements.push(base64File);
+                            }
+                        })(f, this.currentWorkingObject);
+
+                        fileReader.readAsDataURL(f);
+
+                        // Display
+                        this.displayOutputMessage(f);
+                    }
+                    $uploadOutput.html('<ul>' + this.output.join('') + '</ul>');
+                },
+                displayOutputMessage: function (f) {
+                    this.output.push('<li><strong>',
+                            escape(f.name),
+                            '</strong> (',
+                            f.type || 'n/a', ') - ',
+                            f.size, ' bytes, last modified: ',
+                            f.lastModifiedDate.toLocaleDateString(), '</li>');
+                },
+                serialize: function (form) {
+                    this.currentWorkingObject.serializedFormData = form;
+                    try {
+                        localStorage.setItem(this.currentWorkingObject.uid, this.currentWorkingObject);
+                    } catch (e) {
+                        console.log("Storage failed: " + e);
+                    }
+                }
+            };
+
+            note.init(); // move to a more suitable place later
+        });
+    </script>
 </body>
 </html>
