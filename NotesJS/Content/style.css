@@ -53,3 +53,10 @@ span.icon  {
     margin: 0 5px 0 0;
 }
 
+#createNoteView {
+    display: none;
+}
+td:nth-child(1) {
+   display: none;
+}
+

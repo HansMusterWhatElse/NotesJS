@@ -7,10 +7,13 @@
     <link href="Content/bootstrap-theme.min.css" rel="stylesheet" />
     <link href="Content/bootstrap-datetimepicker.css" rel="stylesheet" />
     <link href="Content/style.css" rel="stylesheet" />
+
     <!--
     ----------------------
     My ToDo's
     ----------------------
+
+    -1) Parse date for datepicker
     0) Change priority Selection => 3 radio buttons with a picture
     1) Change color depening on the due date (red, orange, green)
     2) Show all or just pending Notes => hack near the Status Column?
@@ -20,6 +23,14 @@
     5.1) If allready an existing attachement => add
     5.2) Add remove button for a file
     6) Move note.init() to a more suitable location
+    7) Form validation
+
+    ----------------------
+    Issues
+    ----------------------
+
+    1) Change status in form => auto scroll to the top
+
     -->
 </head>
 <body id="home">
@@ -38,7 +49,7 @@
             <nav class="navbar navbar-default">
                 <div class="container-fluid">
                     <div class="navbar-header">
-                        <a class="navbar-brand" href="#"><span class="glyphicon glyphicon-plus"></span></a>
+                        <a id="addNote" class="navbar-brand" href="#"><span class="glyphicon glyphicon-plus"></span></a>
                     </div>
                     <div id="navbar" class="navbar-collapse collapse">
                         <ul class="nav navbar-nav">
@@ -70,13 +81,16 @@
 
     <section class="container">
         <!--Create Note-->
-        <div class="panel panel-default">
+        <div id="createNoteView" class="panel panel-default">
             <div class="panel-heading">
                 <span class="glyphicon glyphicon-file icon"></span>
                 Create Note
             </div>
             <div class="panel-body">
                 <form id="note-form" role="form">
+                    <div class="form-group">
+                        <input name="guid" class="form-control" id="guid" type="hidden">
+                    </div>
                     <div class="form-group">
                         <label for="title">Title:</label>
                         <input name="title" class="form-control" id="title">
@@ -88,22 +102,34 @@
                     <div class="form-group">
                         <label>Priority:</label>
                         <div class="radio">
-                            <label><input type="radio" name="optpriority"><span class="glyphicon glyphicon-circle-arrow-up icon"></span>High</label>
+                            <label><input type="radio" name="optpriority" value="high"><span class="glyphicon glyphicon-circle-arrow-up icon"></span>High</label>
                         </div>
                         <div class="radio">
-                            <label><input type="radio" name="optpriority"><span class="glyphicon glyphicon-circle-arrow-left icon"></span>Medium</label>
+                            <label><input type="radio" name="optpriority" value="medium"><span class="glyphicon glyphicon-circle-arrow-left icon"></span>Medium</label>
                         </div>
                         <div class="radio">
-                            <label><input type="radio" name="optpriority"><span class="glyphicon glyphicon-circle-arrow-down icon"></span>Low</label>
+                            <label><input type="radio" name="optpriority" value="low"><span class="glyphicon glyphicon-circle-arrow-down icon"></span>Low</label>
                         </div>
                     </div>
                     <div class="form-group">
                         <label>Due Date:</label>
                         <div class="input-group date" id="datetimepicker">
-                            <input name="duedate" type="text" class="form-control" />
+                            <input name="duedate" type="datetime" class="form-control" />
                             <span class="input-group-addon">
                                 <span class="glyphicon glyphicon-calendar"></span>
                             </span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="dropdown">
+                            <button name="status" class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">
+                                Status
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a href="#">Pending</a></li>
+                                <li><a href="#">Closed</a></li>
+                            </ul>
                         </div>
                     </div>
                     <div form-group>
@@ -117,7 +143,7 @@
         </div>
 
         <!-- Display Notes -->
-        <div class="panel panel-default">
+        <div id="noteVîew" class="panel panel-default">
             <div class="panel-heading">
                 <span class="glyphicon glyphicon-list-alt icon"></span>
                 Notes
@@ -136,6 +162,7 @@
                     </thead>
                     <tbody>
                         <tr>
+                            <td>GUID1</td>
                             <td><span class="glyphicon glyphicon-ok icon"></span></td>
                             <td>10.02.2016</td>
                             <td>10.02.2016</td>
@@ -151,6 +178,7 @@
                             </td>
                         </tr>
                         <tr>
+                            <td>GUID2</td>
                             <td><span class="glyphicon glyphicon-ok icon"></span></td>
                             <td>10.02.2016</td>
                             <td>10.02.2016</td>
@@ -166,6 +194,7 @@
                             </td>
                         </tr>
                         <tr>
+                            <td>GUID3</td>
                             <td><span class="glyphicon glyphicon-remove icon"></span></td>
                             <td>10.02.2016</td>
                             <td>10.02.2016</td>
@@ -188,19 +217,42 @@
 
     <footer></footer>
     <script src="Scripts/jquery-1.9.0.min.js"></script>
+    <script src="Scripts/jquery-ui-1.11.4.js"></script>
     <script src="Scripts/bootstrap.min.js"></script>
     <script src="Scripts/moment.min.js"></script>
     <script src="Scripts/bootstrap-datetimepicker.min.js"></script>
+    <script src="Scripts/handlebars.min.js"></script>
+
+    <script id="note-row-template" type="text/x-handlebars-template">
+        <tr class="noteTableRow">
+            <td>{{guid}}</td>
+            <td>{{{status}}}</td>
+            <td>{{duedate}}</td>
+            <td>{{creationDate}}</td>
+            <td>{{{optpriority}}}</td>
+            <td>{{desc}}</td>
+            <td>
+                <a href="#" class="icon">
+                    <span class="glyphicon glyphicon-pencil"></span>
+                </a>
+                <a href="#" class="icon">
+                    <span class="glyphicon glyphicon-trash"></span>
+                </a>
+            </td>
+        </tr>
+    </script>
+
     <script>
         $(function () {
             $('#datetimepicker').datetimepicker({
-                // http://momentjs.com/docs/#/displaying/format/
-
+                format: 'D-M-YY hh:mm'
             });
 
             // Drag & Drop for attachements
             var $dragzone = $(".upload-drop-zone");
             var $uploadOutput = $('#upload-output');
+            var $createNoteView = $('#createNoteView');
+            var $form = $("#note-form");
 
             $dragzone.on('dragenter', function (e) {
                 e.stopPropagation();
@@ -221,7 +273,7 @@
                 e.preventDefault();
                 var files = e.originalEvent.dataTransfer.files;
                 // Storing process
-                note.addAttachement(files, $dragzone);
+                myCurrentNote.addAttachement(files, $dragzone);
 
             });
             $(document).on('dragenter', function (e) {
@@ -240,33 +292,88 @@
                 e.preventDefault();
             });
 
-            $('button.btn.btn-default').on('click', function () {
-                var formData = $("#note-form").serialize();
-                note.serialize(formData);
+            // Save form button
+            $("button.btn.btn-default[type='submit'").on('click', function () {
+                var formData = $form.serialize(),
+                    obj = {
+                        status: $("button[name='status']").text().replace(/\s/g, ''),
+                        creationDate : new Date().toLocaleDateString()
+                    };
+                myCurrentNote.serialize(formData, obj);
+                $createNoteView.hide('slow');
             });
 
-            var utility = {
-                createGuid: function () {
-                    'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-                        var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
-                        return v.toString(16);
-                    });
+            ////////////////////////////////////////////////////////////////
+            // Helper Functions
+            ////////////////////////////////////////////////////////////////
+
+            function createGuid() {
+                return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                    var r = Math.random() * 16 | 0,
+                    v = c === 'x' ? r : (r & 0x3 | 0x8);
+                    return v.toString(16);
+                });
+            }
+
+            function isEmpty(str) {
+                return (!str || !str.length);
+            }
+           
+            // Split the query string
+            function splitQueryString(source) {
+                try {
+                    var keys = {};
+                    source.replace(
+                        /([^=&]+)=([^&]*)/g,
+                        function (full, key, value) {
+                            keys[key] = value;
+                            return "";
+                        });
+                    return keys;
+                } catch (e) {
+                    console.log("Splitting the query string failed: " + e);
                 }
             };
 
-            function NoteObject(id){
+            jQuery.fn.tagName = function () {
+                return this.prop("tagName").toLowerCase();;
+            };
+
+            function decodeString(str) {
+                return decodeURIComponent(str).replace("+", " ");
+            };
+
+            function getColValue(key, value) {
+                switch (key) {
+                    case "status":
+                        if (value !== "Status") {
+                            return value.match(/:\s+(\w+)/g)[0] === "Pending" ?
+                               '<span class="glyphicon glyphicon-ok icon"></span>' :
+                               '<span class="glyphicon glyphicon-remove icon"></span>';
+                        } else {
+                            return "";
+                        }                       
+                    case "duedate":
+                        return value.match(/([^\s]+)/)[0];
+                    case "optpriority":
+                        return value === "high" ? '<span class="glyphicon glyphicon-circle-arrow-up icon">' :
+                            value === "medium" ? '<span class="glyphicon glyphicon-circle-arrow-left icon">' :
+                            '<span class="glyphicon glyphicon-circle-arrow-down icon">';
+                    default:
+                        return value;
+                }
+            };
+
+            function NoteObject(id) {
                 this.uid = id;
                 this.attachements = [];
                 this.serializedFormData = "";
             };
 
-            var note = {
-                counter: 1,
-                output: [],
-                init : function() {
-                    this.currentWorkingObject = new NoteObject(utility.createGuid());
-                },
-                addAttachement: function (files, obj) {
+            function Note() {
+                this.output = [];
+                this.currentWorkingObject = new NoteObject(createGuid());
+                this.addAttachement = function (files, obj) {
                     // Display a message concerning the selected files & store the file in the local storage
                     for (var i = 0, f; f = files[i]; i++) {
                         var fileReader = new FileReader();
@@ -278,32 +385,139 @@
                             }
                         })(f, this.currentWorkingObject);
 
+                        // Async
                         fileReader.readAsDataURL(f);
 
                         // Display
                         this.displayOutputMessage(f);
                     }
                     $uploadOutput.html('<ul>' + this.output.join('') + '</ul>');
-                },
-                displayOutputMessage: function (f) {
+                };
+                this.displayOutputMessage = function (f) {
                     this.output.push('<li><strong>',
-                            escape(f.name),
-                            '</strong> (',
-                            f.type || 'n/a', ') - ',
-                            f.size, ' bytes, last modified: ',
-                            f.lastModifiedDate.toLocaleDateString(), '</li>');
-                },
-                serialize: function (form) {
-                    this.currentWorkingObject.serializedFormData = form;
+                        escape(f.name),
+                        '</strong> (',
+                        f.type || 'n/a', ') - ',
+                        f.size, ' bytes, last modified: ',
+                        f.lastModifiedDate.toLocaleDateString(), '</li>');
+                };
+                this.serialize = function (form, paramObj) {
+                    this.currentWorkingObject.serializedFormData = form + '&' + $.param(paramObj);
                     try {
-                        localStorage.setItem(this.currentWorkingObject.uid, this.currentWorkingObject);
+                        localStorage.setItem(this.currentWorkingObject.uid, JSON.stringify(this.currentWorkingObject));
                     } catch (e) {
-                        console.log("Storage failed: " + e);
+                        console.log("Saving item to storage failed: " + e);
                     }
+                };
+                this.deserialize = function (uid) {
+                    try {
+                        return JSON.parse(localStorage.getItem(uid));
+                    } catch (e) {
+                        console.log("Retrieving item from storage failed: " + e);
+                    }
+                }
+
+                this.populateForm = function () {
+                    if (this.currentWorkingObject.serializedFormData) {
+                        var elem = splitQueryString(this.currentWorkingObject.serializedFormData);
+                        // Repopulate the form
+                        $.each(elem, function (key, value) {
+                            var $res = $form.find("[name='" + key + "']"),
+                                decodedValue = decodeString(value);
+                            if ($res.length === 1 || $res.is('input:radio')) {
+                                switch ($res.tagName()) {
+                                    case "input":
+                                        if ($res.is('input[value=' + decodedValue + ']:radio')) {
+                                            // Input radio butto
+                                            $("input[name='" + key + "'][value='" + decodedValue + "']").attr('checked', 'checked');
+                                        } else {
+                                            // Input regular
+                                            $res.val(decodedValue);
+                                        }
+                                        break;
+                                    case "textarea":
+                                        $res.append(decodedValue);
+                                        break;
+                                    case "button":
+                                        $res.html(decodedValue);
+                                        break;
+                                    default:
+                                        console.log("Mapping for the deserialisation process failed. Key: " + key + " Value: " + value);
+                                        break;
+                                }
+                            } else {
+                                console.log("Duplicate entries for Key: " + key + " Value: " + value);
+                            }
+                        });
+                    }
+                };
+            };
+
+            function NoteCollection() {
+                this.collection = [];
+                this.mapLocalStorage = function () {
+                    for (var i = 0, len = localStorage.length; i < len; i++) {
+                        var key = localStorage.key(i);
+                        if (key.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/g)) {
+                            var note = new Note();
+                            note = note.deserialize(key);
+                            if (note) {
+                                this.collection.push(note);
+                            }
+                        }
+                    }
+                }
+                this.populateTable = function () {
+                    $.each(this.collection, function (index, obj) {
+                        var deserializedObj = splitQueryString(obj.serializedFormData);
+                        $.each(deserializedObj, function (key, value) {
+                            deserializedObj[key] = getColValue(key, decodeString(value));
+                        });
+                        var html = template(deserializedObj);
+                    });
                 }
             };
 
-            note.init(); // move to a more suitable place later
+            $('#addNote').on('click', function (uid) {
+                $createNoteView.toggle('slow', function () {
+                    if ($(this).is(':visible')) {
+                        myCurrentNote = new Note();
+                        $form.find("input[name='guid'][type='hidden']").val(myCurrentNote.currentWorkingObject.uid);
+                    }
+                });
+            });
+
+            $(".dropdown-menu").find('a').on("click", function (event) {
+                $('.dropdown-toggle').text("Status: " + $(this).text());
+            });
+
+            ////////////////////////////////////////////////////////////////
+            /// Move to an global initialisation function for everything
+            ////////////////////////////////////////////////////////////////
+            var source = $("#note-row-template").html();
+            var template = Handlebars.compile(source);
+
+            var noteCollection = new NoteCollection();
+            noteCollection.mapLocalStorage();
+            noteCollection.populateTable();
+
+            var myCurrentNote = new Note();
+
+            //////////////////////////////////////////////////////////////
+
+            function loadNoteToForm(uid) {
+                myCurrentNote = new Note();
+                uid = '1b8391c7-7e6c-43fc-810c-4a4f70e42ca5';
+
+                if (!isEmpty(uid)) {
+                    myCurrentNote.currentWorkingObject = myCurrentNote.deserialize(uid);
+                    myCurrentNote.populateForm();
+                }
+
+                $createNoteView.show('slow');
+            };
+
+            loadNoteToForm();
         });
     </script>
 </body>
