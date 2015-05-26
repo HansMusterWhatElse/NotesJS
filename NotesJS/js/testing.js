@@ -3,7 +3,6 @@ var testingObj = {
     loadNoteToForm: function (uid) {
         // Create a new note
         app.createNote();
-
         // Retrieve guid
         var lastGuid = testingObj.retrieveGuid();
         // Use the key passed as parameter, if its empty, use the one from the last serialisation
