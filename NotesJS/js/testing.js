@@ -28,4 +28,4 @@ var testing = {
 };
 
 
-//testing.loadNoteToForm();
+testing.loadNoteToForm();

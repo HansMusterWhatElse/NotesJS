@@ -23,10 +23,10 @@ var app = {
     // Initialise a new node object
     createNote : function(isDebugging) {
         app.myCurrentNote = new Note();
-        app.myCurrentNote.debugging = isDebugging || true;
+        app.myCurrentNote.debugging = isDebugging || false;
         return app.myCurrentNote;
     }
-
+    
 };
 
 // Define a global jQuery function

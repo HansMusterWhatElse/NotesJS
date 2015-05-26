@@ -46,48 +46,66 @@ function Note() {
             console.log("Saving item to storage failed: " + e);
         }
     };
-    this.deserialize = function(uid) {
+    this.deserialize = function (uid) {
         try {
             return JSON.parse(localStorage.getItem(uid));
         } catch (e) {
             console.log("Retrieving item from storage failed: " + e);
         }
     };
-    
+
     this.populateForm = function () {
         if (this.currentWorkingObject.serializedFormData) {
             var elem = helperFn.splitQueryString(this.currentWorkingObject.serializedFormData);
             // Repopulate the form
             $.each(elem, function (key, value) {
-                var $res = $("#note-form").find("[name='" + key + "']"),
-                    decodedValue = helperFn.decodeString(value);
-                if ($res.length === 1 || $res.is('input:radio')) {
-                    switch ($res.tagName()) {
-                        case "input":
-                            if ($res.is('input[value=' + decodedValue + ']:radio')) {
-                                // Input radio butto
-                                $("input[name='" + key + "'][value='" + decodedValue + "']").attr('checked', 'checked');
-                            } else {
-                                // Input regular
-                                $res.val(decodedValue);
-                            }
-                            break;
-                        case "textarea":
-                            $res.append(decodedValue);
-                            break;
-                        case "button":
-                            $res.html(decodedValue);
-                            break;
-                        default:
-                            console.log("Mapping for the deserialisation process failed. Key: " + key + " Value: " + value);
-                            break;
-                    }
-                } else {
-                    console.log("Duplicate entries for Key: " + key + " Value: " + value);
-                }
+                var decodedValue = helperFn.decodeString(value);
+                setFormValue(key, decodedValue);
             });
         }
     };
+
+    this.setFormValue = function (key, value) {
+        var $res = $("#note-form").find("[name='" + key + "']");
+        if ($res.length === 1 || $res.is('input:radio')) {
+            switch ($res.tagName()) {
+                case "input":
+                    // Input radio button
+                    if ($res.is('input:radio')) {
+                        // checks for "high", "medium", "low" => if the value variable is empty => set to unchecked
+                        value ? $("input[name='" + key + "'][value='" + value + "']").attr('checked', 'checked') :
+                            $("input[name='" + key + "'][value='" + value + "']").attr('checked', false);
+                    } else {
+                        // Input regular
+                        $res.val(value);
+                    }
+                    break;
+                case "textarea":
+                    $res.val(value);
+                    break;
+                case "button":
+                    $res.html(!helperFn.isEmpty(value) ? value : "Status");
+                    break;
+                default:
+                    console.log("Mapping for the deserialisation process failed. Key: " + key + " Value: " + value);
+                    break;
+            }
+        } else {
+            console.log("Duplicate entries for Key: " + key + " Value: " + value);
+        }
+    }
+
+    this.clearForm = function() {
+        if (this.currentWorkingObject.serializedFormData) {
+            var elem = helperFn.splitQueryString(this.currentWorkingObject.serializedFormData),
+                note = this; // hack to access the Note object
+
+            // Repopulate the form
+            $.each(elem, function (key) {
+                note.setFormValue(key, "");
+            });
+        }
+    }
 };
 
 function NoteCollection() {
@@ -119,16 +137,16 @@ function NoteCollection() {
         });
     };
 
-    this.getColValue = function(key, value) {
+    this.getColValue = function (key, value) {
         switch (key) {
             case "status":
-                if (value !== "Status") {
-                    return value.match(/:\s+(\w+)/g)[0] === "Pending" ?
+                if (value !== "Status" && !helperFn.isEmpty(value)) { // Table display => icon
+                    return value.match(/:\s*(\w+)/g)[0] === "Pending" ?
                        '<span class="glyphicon glyphicon-ok icon"></span>' :
                        '<span class="glyphicon glyphicon-remove icon"></span>';
                 } else {
-                    return "";
-                }                       
+                    return "Status"; // Button value
+                }
             case "duedate":
                 return !helperFn.isEmpty(value) ? value.match(/([^\s]+)/)[0] : "";
             case "optpriority":

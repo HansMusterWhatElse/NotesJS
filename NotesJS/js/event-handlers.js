@@ -50,6 +50,8 @@
                 creationdate: new Date()
             };
         app.myCurrentNote.serialize(formData, obj);
+        // Clear the form
+        app.myCurrentNote.clearForm();
         $('#createNoteView').hide('slow');
         
         // Prevents the page from reloading and thus another unnecessary initilatisation of app.init()
