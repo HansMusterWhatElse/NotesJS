@@ -33,14 +33,7 @@
     }
 };
 
-var jQueryfn = {
-    init: function () {
-        // Retrieve tag name of current jQuery object
-        JQuery.fn.tagName = function () {
-            return this.prop("tagName").toLowerCase();;
-        };
-    }
-}
+
 
 
 

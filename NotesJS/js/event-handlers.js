@@ -1,34 +1,28 @@
 ﻿$(function () {
-    // Predefined JQuery Selectors
-    var $dragzone = $(".upload-drop-zone");
-    var $uploadOutput = $('#upload-output');
-    var $createNoteView = $('#createNoteView');
-    var $form = $("#note-form");
-
     $('#datetimepicker').datetimepicker({
         format: 'D-M-YY hh:mm'
     });
 
-    $dragzone.on('dragenter', function (e) {
+    $(".upload-drop-zone").on('dragenter', function (e) {
         e.stopPropagation();
         e.preventDefault();
         $(this).css('border', '2px solid #ccc');
     });
-    $dragzone.on('dragleave', function (e) {
+    $(".upload-drop-zone").on('dragleave', function (e) {
         e.stopPropagation();
         e.preventDefault();
         $(this).css('border', '2px dashed #ccc');
     });
-    $dragzone.on('dragover', function (e) {
+    $(".upload-drop-zone").on('dragover', function (e) {
         e.stopPropagation();
         e.preventDefault();
     });
-    $dragzone.on('drop', function (e) {
+    $(".upload-drop-zone").on('drop', function (e) {
         $(this).css('border', '2px dashed #ccc');
         e.preventDefault();
         var files = e.originalEvent.dataTransfer.files;
         // Storing process
-        myCurrentNote.addAttachement(files, $dragzone);
+        myCurrentNote.addAttachement(files);
 
     });
     $(document).on('dragenter', function (e) {
@@ -49,23 +43,23 @@
 
     // Save form button
     $("button.btn.btn-default[type='submit'").on('click', function (e) {
-        var formData = $form.serialize(),
+        var formData = $("#note-form").serialize(),
             obj = {
                 status: $("button[name='status']").text().replace(/\s/g, ''),
                 creationDate: new Date().toLocaleDateString()
             };
         myCurrentNote.serialize(formData, obj);
-        $createNoteView.hide('slow');
+        $('#createNoteView').hide('slow');
         
-        // Prevents the page from reloading and thus another initilatisation of app.init()
+        // Prevents the page from reloading and thus another unnecessary initilatisation of app.init()
         e.preventDefault();
     });
 
     $('#addNote').on('click', function (uid) {
-        $createNoteView.toggle('slow', function () {
+        $('#createNoteView').toggle('slow', function () {
             if ($(this).is(':visible')) {
                 myCurrentNote = new Note();
-                $form.find("input[name='guid'][type='hidden']").val(myCurrentNote.currentWorkingObject.uid);
+                $("#note-form").find("input[name='guid'][type='hidden']").val(myCurrentNote.currentWorkingObject.uid);
             }
         });
     });

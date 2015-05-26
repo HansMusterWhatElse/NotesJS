@@ -7,7 +7,7 @@
 function Note() {
     this.output = [];
     this.currentWorkingObject = new NoteObject(helperFn.createGuid());
-    this.addAttachement = function (files, obj) {
+    this.addAttachement = function (files) {
         // Display a message concerning the selected files & store the file in the local storage
         for (var i = 0, f; f = files[i]; i++) {
             var fileReader = new FileReader();
@@ -25,7 +25,7 @@ function Note() {
             // Display
             this.displayOutputMessage(f);
         }
-        $uploadOutput.html('<ul>' + this.output.join('') + '</ul>');
+        $('#upload-output').html('<ul>' + this.output.join('') + '</ul>');
     };
     this.displayOutputMessage = function (f) {
         this.output.push('<li><strong>',
@@ -53,11 +53,11 @@ function Note() {
 
     this.populateForm = function () {
         if (this.currentWorkingObject.serializedFormData) {
-            var elem = splitQueryString(this.currentWorkingObject.serializedFormData);
+            var elem = helperFn.splitQueryString(this.currentWorkingObject.serializedFormData);
             // Repopulate the form
             $.each(elem, function (key, value) {
-                var $res = $form.find("[name='" + key + "']"),
-                    decodedValue = decodeString(value);
+                var $res = $("#note-form").find("[name='" + key + "']"),
+                    decodedValue = helperFn.decodeString(value);
                 if ($res.length === 1 || $res.is('input:radio')) {
                     switch ($res.tagName()) {
                         case "input":
