@@ -136,7 +136,7 @@ function NoteCollection() {
         $.each(this.collection, function (index, obj) {
             var deserializedObj = helperFn.splitQueryString(obj.serializedFormData);
             $.each(deserializedObj, function (key, value) {
-                deserializedObj[key] = nodeCol.getColValue(key, helperFn.decodeString(value));
+                deserializedObj[key] = nodeCol.getColValue(key, value);
             });
             var html = app.template(deserializedObj);
         });
