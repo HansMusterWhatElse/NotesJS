@@ -28,6 +28,7 @@ function Note() {
         }
         $('#upload-output').html('<ul>' + this.output.join('') + '</ul>');
     };
+
     this.displayOutputMessage = function (f) {
         this.output.push('<li><strong>',
             escape(f.name),
@@ -36,16 +37,18 @@ function Note() {
             f.size, ' bytes, last modified: ',
             f.lastModifiedDate.toLocaleDateString(), '</li>');
     };
+
     this.serialize = function (form, paramObj) {
         this.currentWorkingObject.serializedFormData = form + '&' + $.param(paramObj);
         try {
             localStorage.setItem(this.currentWorkingObject.uid, JSON.stringify(this.currentWorkingObject));
             // Set the guid for the testing environment to the last serialized guid => localstorage
-            this.debugging && testing.storeGuid(this.currentWorkingObject.uid);
+            this.debugging && testingObj.storeGuid(this.currentWorkingObject.uid);
         } catch (e) {
             console.log("Saving item to storage failed: " + e);
         }
     };
+
     this.deserialize = function (uid) {
         try {
             return JSON.parse(localStorage.getItem(uid));
@@ -57,13 +60,23 @@ function Note() {
     this.populateForm = function () {
         if (this.currentWorkingObject.serializedFormData) {
             var elem = helperFn.splitQueryString(this.currentWorkingObject.serializedFormData);
-            // Repopulate the form
             $.each(elem, function (key, value) {
                 var decodedValue = helperFn.decodeString(value);
                 setFormValue(key, decodedValue);
             });
         }
     };
+
+    // Clear the form with an empty string
+    this.clearForm = function() {
+        if (this.currentWorkingObject.serializedFormData) {
+            var elem = helperFn.splitQueryString(this.currentWorkingObject.serializedFormData),
+                note = this; // hack to access the Note object
+            $.each(elem, function (key) {
+                note.setFormValue(key, "");
+            });
+        }
+    }
 
     this.setFormValue = function (key, value) {
         var $res = $("#note-form").find("[name='" + key + "']");
@@ -94,18 +107,6 @@ function Note() {
             console.log("Duplicate entries for Key: " + key + " Value: " + value);
         }
     }
-
-    this.clearForm = function() {
-        if (this.currentWorkingObject.serializedFormData) {
-            var elem = helperFn.splitQueryString(this.currentWorkingObject.serializedFormData),
-                note = this; // hack to access the Note object
-
-            // Repopulate the form
-            $.each(elem, function (key) {
-                note.setFormValue(key, "");
-            });
-        }
-    }
 };
 
 function NoteCollection() {
@@ -114,6 +115,8 @@ function NoteCollection() {
         this.mapLocalStorage();
         this.populateTable();
     };
+
+    // Retrieves all the data from the local storage which use a guid as key
     this.mapLocalStorage = function () {
         for (var i = 0, len = localStorage.length; i < len; i++) {
             var key = localStorage.key(i);
@@ -126,6 +129,8 @@ function NoteCollection() {
             }
         }
     };
+
+    // Populates the table with the notes from the local storage => passes the deserialised object to the handlebar framework
     this.populateTable = function () {
         var nodeCol = this;
         $.each(this.collection, function (index, obj) {
@@ -137,6 +142,7 @@ function NoteCollection() {
         });
     };
 
+    // Sets the column values for the <td> elements in the note collection table
     this.getColValue = function (key, value) {
         switch (key) {
             case "status":

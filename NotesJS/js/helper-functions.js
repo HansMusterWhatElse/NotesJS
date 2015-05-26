@@ -1,4 +1,5 @@
 ﻿var helperFn = {
+
     // Create a 128 bit guid 
     createGuid: function () {
         return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
@@ -7,10 +8,12 @@
             return v.toString(16);
         });
     },
+
     // Check for undefined & empty
     isEmpty: function (str) {
         return (!str || !str.length);
     },
+
     // Split the query string
     splitQueryString: function (source) {
         try {

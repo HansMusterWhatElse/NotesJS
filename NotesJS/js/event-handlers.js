@@ -50,6 +50,7 @@
                 creationdate: new Date()
             };
         app.myCurrentNote.serialize(formData, obj);
+
         // Clear the form
         app.myCurrentNote.clearForm();
         $('#createNoteView').hide('slow');
@@ -68,6 +69,7 @@
         });
     });
 
+    // Updates the text regarding the status "Pending" or "Closed"
     $(".dropdown-menu").find('a').on("click", function (event) {
         $('.dropdown-toggle').text("Status: " + $(this).text());
     });
