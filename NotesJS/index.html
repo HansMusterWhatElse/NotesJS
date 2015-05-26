@@ -216,13 +216,22 @@
     </section><!--container-->
 
     <footer></footer>
+
+    <!-- Frameworks JavaScript-->
     <script src="Scripts/jquery-1.9.0.min.js"></script>
     <script src="Scripts/jquery-ui-1.11.4.js"></script>
     <script src="Scripts/bootstrap.min.js"></script>
     <script src="Scripts/moment.min.js"></script>
     <script src="Scripts/bootstrap-datetimepicker.min.js"></script>
     <script src="Scripts/handlebars.min.js"></script>
+    <!-- Customised JavaScript-->
+    <script src="js/app.js"></script>
+    <script src="js/event-handlers.js"></script>
+    <script src="js/helper-functions.js"></script>
+    <script src="js/note.js"></script>
+    <script src="js/testing.js"></script>
 
+    <!-- Handlebar Template -->
     <script id="note-row-template" type="text/x-handlebars-template">
         <tr class="noteTableRow">
             <td>{{guid}}</td>
@@ -242,282 +251,10 @@
         </tr>
     </script>
 
+    <!-- Initialise Application -->
     <script>
         $(function () {
-            $('#datetimepicker').datetimepicker({
-                format: 'D-M-YY hh:mm'
-            });
-
-            // Drag & Drop for attachements
-            var $dragzone = $(".upload-drop-zone");
-            var $uploadOutput = $('#upload-output');
-            var $createNoteView = $('#createNoteView');
-            var $form = $("#note-form");
-
-            $dragzone.on('dragenter', function (e) {
-                e.stopPropagation();
-                e.preventDefault();
-                $(this).css('border', '2px solid #ccc');
-            });
-            $dragzone.on('dragleave', function (e) {
-                e.stopPropagation();
-                e.preventDefault();
-                $(this).css('border', '2px dashed #ccc');
-            });
-            $dragzone.on('dragover', function (e) {
-                e.stopPropagation();
-                e.preventDefault();
-            });
-            $dragzone.on('drop', function (e) {
-                $(this).css('border', '2px dashed #ccc');
-                e.preventDefault();
-                var files = e.originalEvent.dataTransfer.files;
-                // Storing process
-                myCurrentNote.addAttachement(files, $dragzone);
-
-            });
-            $(document).on('dragenter', function (e) {
-                // Prevents the default action of the browser to open the file in the window
-                e.stopPropagation();
-                e.preventDefault();
-            });
-            $(document).on('dragover', function (e) {
-                // Prevents the default action of the browser to open the file in the window
-                e.stopPropagation();
-                e.preventDefault();
-            });
-            $(document).on('drop', function (e) {
-                // Prevents the default action of the browser to open the file in the window
-                e.stopPropagation();
-                e.preventDefault();
-            });
-
-            // Save form button
-            $("button.btn.btn-default[type='submit'").on('click', function () {
-                var formData = $form.serialize(),
-                    obj = {
-                        status: $("button[name='status']").text().replace(/\s/g, ''),
-                        creationDate : new Date().toLocaleDateString()
-                    };
-                myCurrentNote.serialize(formData, obj);
-                $createNoteView.hide('slow');
-            });
-
-            ////////////////////////////////////////////////////////////////
-            // Helper Functions
-            ////////////////////////////////////////////////////////////////
-
-            function createGuid() {
-                return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-                    var r = Math.random() * 16 | 0,
-                    v = c === 'x' ? r : (r & 0x3 | 0x8);
-                    return v.toString(16);
-                });
-            }
-
-            function isEmpty(str) {
-                return (!str || !str.length);
-            }
-           
-            // Split the query string
-            function splitQueryString(source) {
-                try {
-                    var keys = {};
-                    source.replace(
-                        /([^=&]+)=([^&]*)/g,
-                        function (full, key, value) {
-                            keys[key] = value;
-                            return "";
-                        });
-                    return keys;
-                } catch (e) {
-                    console.log("Splitting the query string failed: " + e);
-                }
-            };
-
-            jQuery.fn.tagName = function () {
-                return this.prop("tagName").toLowerCase();;
-            };
-
-            function decodeString(str) {
-                return decodeURIComponent(str).replace("+", " ");
-            };
-
-            function getColValue(key, value) {
-                switch (key) {
-                    case "status":
-                        if (value !== "Status") {
-                            return value.match(/:\s+(\w+)/g)[0] === "Pending" ?
-                               '<span class="glyphicon glyphicon-ok icon"></span>' :
-                               '<span class="glyphicon glyphicon-remove icon"></span>';
-                        } else {
-                            return "";
-                        }                       
-                    case "duedate":
-                        return value.match(/([^\s]+)/)[0];
-                    case "optpriority":
-                        return value === "high" ? '<span class="glyphicon glyphicon-circle-arrow-up icon">' :
-                            value === "medium" ? '<span class="glyphicon glyphicon-circle-arrow-left icon">' :
-                            '<span class="glyphicon glyphicon-circle-arrow-down icon">';
-                    default:
-                        return value;
-                }
-            };
-
-            function NoteObject(id) {
-                this.uid = id;
-                this.attachements = [];
-                this.serializedFormData = "";
-            };
-
-            function Note() {
-                this.output = [];
-                this.currentWorkingObject = new NoteObject(createGuid());
-                this.addAttachement = function (files, obj) {
-                    // Display a message concerning the selected files & store the file in the local storage
-                    for (var i = 0, f; f = files[i]; i++) {
-                        var fileReader = new FileReader();
-                        fileReader.onload = (function (file, curObject) {
-                            return function (evt) {
-                                // Read out file contents as a data URL => result => base64 encoded data string
-                                var base64File = evt.target.result;
-                                curObject.attachements.push(base64File);
-                            }
-                        })(f, this.currentWorkingObject);
-
-                        // Async
-                        fileReader.readAsDataURL(f);
-
-                        // Display
-                        this.displayOutputMessage(f);
-                    }
-                    $uploadOutput.html('<ul>' + this.output.join('') + '</ul>');
-                };
-                this.displayOutputMessage = function (f) {
-                    this.output.push('<li><strong>',
-                        escape(f.name),
-                        '</strong> (',
-                        f.type || 'n/a', ') - ',
-                        f.size, ' bytes, last modified: ',
-                        f.lastModifiedDate.toLocaleDateString(), '</li>');
-                };
-                this.serialize = function (form, paramObj) {
-                    this.currentWorkingObject.serializedFormData = form + '&' + $.param(paramObj);
-                    try {
-                        localStorage.setItem(this.currentWorkingObject.uid, JSON.stringify(this.currentWorkingObject));
-                    } catch (e) {
-                        console.log("Saving item to storage failed: " + e);
-                    }
-                };
-                this.deserialize = function (uid) {
-                    try {
-                        return JSON.parse(localStorage.getItem(uid));
-                    } catch (e) {
-                        console.log("Retrieving item from storage failed: " + e);
-                    }
-                }
-
-                this.populateForm = function () {
-                    if (this.currentWorkingObject.serializedFormData) {
-                        var elem = splitQueryString(this.currentWorkingObject.serializedFormData);
-                        // Repopulate the form
-                        $.each(elem, function (key, value) {
-                            var $res = $form.find("[name='" + key + "']"),
-                                decodedValue = decodeString(value);
-                            if ($res.length === 1 || $res.is('input:radio')) {
-                                switch ($res.tagName()) {
-                                    case "input":
-                                        if ($res.is('input[value=' + decodedValue + ']:radio')) {
-                                            // Input radio butto
-                                            $("input[name='" + key + "'][value='" + decodedValue + "']").attr('checked', 'checked');
-                                        } else {
-                                            // Input regular
-                                            $res.val(decodedValue);
-                                        }
-                                        break;
-                                    case "textarea":
-                                        $res.append(decodedValue);
-                                        break;
-                                    case "button":
-                                        $res.html(decodedValue);
-                                        break;
-                                    default:
-                                        console.log("Mapping for the deserialisation process failed. Key: " + key + " Value: " + value);
-                                        break;
-                                }
-                            } else {
-                                console.log("Duplicate entries for Key: " + key + " Value: " + value);
-                            }
-                        });
-                    }
-                };
-            };
-
-            function NoteCollection() {
-                this.collection = [];
-                this.mapLocalStorage = function () {
-                    for (var i = 0, len = localStorage.length; i < len; i++) {
-                        var key = localStorage.key(i);
-                        if (key.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/g)) {
-                            var note = new Note();
-                            note = note.deserialize(key);
-                            if (note) {
-                                this.collection.push(note);
-                            }
-                        }
-                    }
-                }
-                this.populateTable = function () {
-                    $.each(this.collection, function (index, obj) {
-                        var deserializedObj = splitQueryString(obj.serializedFormData);
-                        $.each(deserializedObj, function (key, value) {
-                            deserializedObj[key] = getColValue(key, decodeString(value));
-                        });
-                        var html = template(deserializedObj);
-                    });
-                }
-            };
-
-            $('#addNote').on('click', function (uid) {
-                $createNoteView.toggle('slow', function () {
-                    if ($(this).is(':visible')) {
-                        myCurrentNote = new Note();
-                        $form.find("input[name='guid'][type='hidden']").val(myCurrentNote.currentWorkingObject.uid);
-                    }
-                });
-            });
-
-            $(".dropdown-menu").find('a').on("click", function (event) {
-                $('.dropdown-toggle').text("Status: " + $(this).text());
-            });
-
-            ////////////////////////////////////////////////////////////////
-            /// Move to an global initialisation function for everything
-            ////////////////////////////////////////////////////////////////
-            var source = $("#note-row-template").html();
-            var template = Handlebars.compile(source);
-
-            var noteCollection = new NoteCollection();
-            noteCollection.mapLocalStorage();
-            noteCollection.populateTable();
-
-            var myCurrentNote = new Note();
-
-            //////////////////////////////////////////////////////////////
-
-            //function loadNoteToForm(uid) {
-            //    myCurrentNote = new Note();
-            //    uid = '1b8391c7-7e6c-43fc-810c-4a4f70e42ca5';
-
-            //    if (!isEmpty(uid)) {
-            //        myCurrentNote.currentWorkingObject = myCurrentNote.deserialize(uid);
-            //        myCurrentNote.populateForm();
-            //    }
-
-            //    $createNoteView.show('slow');
-            //};
-
-            //loadNoteToForm();
+            app.init();
         });
     </script>
 </body>
