@@ -48,7 +48,7 @@
     });
 
     // Save form button
-    $("button.btn.btn-default[type='submit'").on('click', function () {
+    $("button.btn.btn-default[type='submit'").on('click', function (e) {
         var formData = $form.serialize(),
             obj = {
                 status: $("button[name='status']").text().replace(/\s/g, ''),
@@ -56,6 +56,9 @@
             };
         myCurrentNote.serialize(formData, obj);
         $createNoteView.hide('slow');
+        
+        // Prevents the page from reloading and thus another initilatisation of app.init()
+        e.preventDefault();
     });
 
     $('#addNote').on('click', function (uid) {
