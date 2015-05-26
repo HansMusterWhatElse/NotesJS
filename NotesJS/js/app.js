@@ -1,11 +1,11 @@
 ﻿var app = {
     init: function () {
-        // Initialise the note collection
-        app.mapLocalStorageWithTable();
-
         // Initialise the handlebar template
         var source = $("#note-row-template").html();
         app.template = Handlebars.compile(source);
+
+        // Initialise the note collection
+        app.mapLocalStorageWithTable();
 
         // Initialise the current note
         app.myCurrentNote = new Note();
