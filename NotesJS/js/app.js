@@ -1,4 +1,11 @@
-﻿var app = {
+﻿// Initialise Application -->
+
+$(function () {
+    app.init();
+});
+
+
+var app = {
     init: function () {
         // Initialise the handlebar template
         var source = $("#note-row-template").html();
