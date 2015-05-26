@@ -6,6 +6,7 @@
 
 function Note() {
     this.output = [];
+    this.debugging = false;
     this.currentWorkingObject = new NoteObject(helperFn.createGuid());
     this.addAttachement = function (files) {
         // Display a message concerning the selected files & store the file in the local storage
@@ -39,18 +40,20 @@ function Note() {
         this.currentWorkingObject.serializedFormData = form + '&' + $.param(paramObj);
         try {
             localStorage.setItem(this.currentWorkingObject.uid, JSON.stringify(this.currentWorkingObject));
+            // Set the guid for the testing environment to the last serialized guid => localstorage
+            this.debugging && testing.storeGuid(this.currentWorkingObject.uid);
         } catch (e) {
             console.log("Saving item to storage failed: " + e);
         }
     };
-    this.deserialize = function (uid) {
+    this.deserialize = function(uid) {
         try {
             return JSON.parse(localStorage.getItem(uid));
         } catch (e) {
             console.log("Retrieving item from storage failed: " + e);
         }
-    }
-
+    };
+    
     this.populateForm = function () {
         if (this.currentWorkingObject.serializedFormData) {
             var elem = helperFn.splitQueryString(this.currentWorkingObject.serializedFormData);
@@ -132,6 +135,8 @@ function NoteCollection() {
                 return value === "high" ? '<span class="glyphicon glyphicon-circle-arrow-up icon">' :
                     value === "medium" ? '<span class="glyphicon glyphicon-circle-arrow-left icon">' :
                     '<span class="glyphicon glyphicon-circle-arrow-down icon">';
+            case "creationdate":
+                return new Date(value);
             default:
                 return value;
         }

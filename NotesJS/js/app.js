@@ -1,4 +1,4 @@
-﻿// Initialise Application
+﻿// Initialises the application
 $(function () {
     app.init();
 });
@@ -9,10 +9,7 @@ var app = {
         var source = $("#note-row-template").html();
         app.template = Handlebars.compile(source);
 
-        // Initialise the current note
-        app.myCurrentNote = new Note();
-
-        // Initialise the note collection
+        // Initialise the note collection from the local storage
         app.mapLocalStorageWithTable();
     },
     
@@ -21,6 +18,13 @@ var app = {
     {
         app.noteCollection = new NoteCollection();
         app.noteCollection.init();        
+    },
+
+    // Initialise a new node object
+    createNote : function(isDebugging) {
+        app.myCurrentNote = new Note();
+        app.myCurrentNote.debugging = isDebugging || true;
+        return app.myCurrentNote;
     }
 
 };

@@ -24,6 +24,7 @@
     5.2) Add remove button for a file
     6) Move note.init() to a more suitable location
     7) Form validation
+    8) Note collection table => add guid to the <th> and hide it
 
     ----------------------
     Issues
@@ -69,6 +70,9 @@
                 <form id="note-form" role="form">
                     <div class="form-group">
                         <input name="guid" class="form-control" id="guid" type="hidden">
+                    </div>
+                    <div class="form-group">
+                        <input name="creationdate" class="form-control" id="creationdate" type="hidden">
                     </div>
                     <div class="form-group">
                         <label for="title">Title:</label>
@@ -130,14 +134,14 @@
             <div class="panel-body">
                 <table class="table">
                     <thead>
-                        <tr>
-                            <th>Status</th>
-                            <th>Due</th>
-                            <th>Creation</th>
-                            <th>Importance</th>
-                            <th>Description</th>
-                            <th>Actions</th>
-                        </tr>
+                    <tr>
+                        <th>Status</th>
+                        <th>Due</th>
+                        <th>Creation</th>
+                        <th>Importance</th>
+                        <th>Description</th>
+                        <th>Actions</th>
+                    </tr>
                     </thead>
                     <tbody>
                         <tr>

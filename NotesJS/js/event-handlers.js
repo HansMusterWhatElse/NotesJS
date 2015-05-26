@@ -22,7 +22,7 @@
         e.preventDefault();
         var files = e.originalEvent.dataTransfer.files;
         // Storing process
-        myCurrentNote.addAttachement(files);
+        app.myCurrentNote.addAttachement(files);
 
     });
     $(document).on('dragenter', function (e) {
@@ -44,22 +44,24 @@
     // Save form button
     $("button.btn.btn-default[type='submit'").on('click', function (e) {
         var formData = $("#note-form").serialize(),
+            // further object to serialize
             obj = {
                 status: $("button[name='status']").text().replace(/\s/g, ''),
-                creationDate: new Date().toLocaleDateString()
+                creationdate: new Date()
             };
-        myCurrentNote.serialize(formData, obj);
+        app.myCurrentNote.serialize(formData, obj);
         $('#createNoteView').hide('slow');
         
         // Prevents the page from reloading and thus another unnecessary initilatisation of app.init()
         e.preventDefault();
     });
 
-    $('#addNote').on('click', function (uid) {
+    $('#addNote').on('click', function () {
+        // Create new note object which gets stored in the global app
+        app.createNote();
         $('#createNoteView').toggle('slow', function () {
             if ($(this).is(':visible')) {
-                myCurrentNote = new Note();
-                $("#note-form").find("input[name='guid'][type='hidden']").val(myCurrentNote.currentWorkingObject.uid);
+                $("#note-form").find("input[name='guid'][type='hidden']").val(app.myCurrentNote.currentWorkingObject.uid);
             }
         });
     });
