@@ -31,7 +31,7 @@
 
     1) Change status in form => auto scroll to the top
     2) Git => check in => different user
-    3) Frameworks? Design?
+
     -->
 </head>
 <body id="home">
@@ -97,11 +97,14 @@
                     <div class="form-group">
                         <label>Due Date:</label>
                         <div class="input-group date" id="datetimepicker">
-                            <input name="duedate" type="datetime" class="form-control" />
+                            <input name="duedate" type="datetime" class="form-control"/>
                             <span class="input-group-addon">
                                 <span class="glyphicon glyphicon-calendar"></span>
                             </span>
                         </div>
+                    </div>
+                    <div class="form-group">
+                        <input name="status" class="form-control" id="status" type="hidden">
                     </div>
                     <div class="form-group">
                         <div class="dropdown">
@@ -216,13 +219,14 @@
 
     <!-- Handlebar Template -->
     <script id="note-row-template" type="text/x-handlebars-template">
+    {{#each this}}
         <tr class="noteTableRow">
-            <td>{{guid}}</td>
-            <td>{{{status}}}</td>
-            <td>{{duedate}}</td>
-            <td>{{creationDate}}</td>
-            <td>{{{optpriority}}}</td>
-            <td>{{desc}}</td>
+            <td>{{this.formDataObj.guid}}</td>
+            <td>{{{this.formDataObj.status}}}</td>
+            <td>{{this.formDataObj.duedate}}</td>
+            <td>{{this.formDataObj.creationdate}}</td>
+            <td>{{{this.formDataObj.optpriority}}}</td>
+            <td>{{this.formDataObj.desc}}</td>
             <td>
                 <a href="#" class="icon">
                     <span class="glyphicon glyphicon-pencil"></span>
@@ -232,6 +236,7 @@
                 </a>
             </td>
         </tr>
-    </script>
+    {{/each}}
+</script>
 </body>
 </html>

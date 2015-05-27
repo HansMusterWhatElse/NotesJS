@@ -1,6 +1,6 @@
 ﻿$(function () {
     $('#datetimepicker').datetimepicker({
-        format: 'D-M-YY hh:mm'
+        //format: 'D-M-YY hh:mm'
     });
 
     $(".upload-drop-zone").on('dragenter', function (e) {
@@ -43,35 +43,32 @@
 
     // Save form button
     $("button.btn.btn-default[type='submit'").on('click', function (e) {
-        var formData = $("#note-form").serialize(),
-            // further object to serialize
-            obj = {
-                status: $("button[name='status']").text().replace(/\s/g, ''),
-                creationdate: new Date()
-            };
-        app.myCurrentNote.serialize(formData, obj);
-
-        // Clear the form
-        app.myCurrentNote.clearForm();
-        $('#createNoteView').hide('slow');
-        
+        // Pass a serialised object and clear the form
+        app.myCurrentNote.serialise();
+        app.myCurrentNote.clearForm();    
         // Prevents the page from reloading and thus another unnecessary initilatisation of app.init()
         e.preventDefault();
+        $('#createNoteView').hide('slow');
     });
 
     $('#addNote').on('click', function () {
         // Create new note object which gets stored in the global app
         app.createNote();
+        // Set the creation date to the hidden field => creationdate
+        $('#creationdate').val(new Date());
         $('#createNoteView').toggle('slow', function () {
             if ($(this).is(':visible')) {
-                $("#note-form").find("input[name='guid'][type='hidden']").val(app.myCurrentNote.currentWorkingObject.uid);
+                $("#note-form").find("input[name='guid'][type='hidden']").val(app.myCurrentNote.currentWorkingObject.guid);
             }
         });
     });
 
-    // Updates the text regarding the status "Pending" or "Closed"
+    // Form : Status
+    // Updates the button text regarding the status "Pending" or "Closed" and consequently sets a hidden field with the value
     $(".dropdown-menu").find('a').on("click", function (event) {
-        $('.dropdown-toggle').text("Status: " + $(this).text());
+        var val = $(this).text();
+        $('.dropdown-toggle').text("Status: " + val);
+        $('#status').val(val);
     });
 });
 

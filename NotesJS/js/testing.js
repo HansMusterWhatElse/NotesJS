@@ -1,16 +1,16 @@
-﻿// Test retrieving serialized data from local storage and subsequently populate the note form
+﻿// Test retrieving serialised data from local storage and subsequently populate the note form
 var testingObj = {
-    loadNoteToForm: function (uid) {
+    loadNoteToForm: function (guid) {
         // Create a new note
         app.createNote();
         // Retrieve guid
         var lastGuid = testingObj.retrieveGuid();
 
-        if (helperFn.isEmpty(uid) && helperFn.isEmpty(lastGuid)) {
-            // Use the key passed as parameter, if its empty, use the one from the last serialisation
-            app.myCurrentNote.currentWorkingObject = app.myCurrentNote.deserialize(uid || lastGuid);
+        if (!helperFn.isEmpty(guid) && !helperFn.isEmpty(lastGuid)) {
+            // Use the key passed as parameter to the testing function, if its empty, use the one from the last serialisation
+            app.myCurrentNote.currentWorkingObject = app.myCurrentNote.deserialise(guid || lastGuid);
             // Log the guid the console
-            console.log('Deserialisation was done with the following key:' + (uid || lastGuid));
+            console.log('Deserialisation was done with the following key:' + (guid || lastGuid));
             // Populate the form with the deserilised data
             app.myCurrentNote.populateForm();
 
@@ -20,8 +20,8 @@ var testingObj = {
     },
 
     // Stores the last serialised guid from the local storage
-    storeGuid: function (uid) {
-        return !!localStorage.setItem("NoteDebuggingGuid", uid);
+    storeGuid: function (guid) {
+        return !!localStorage.setItem("NoteDebuggingGuid", guid);
     },
 
     // Retrieves the last serialised guid from the local storage
@@ -31,4 +31,4 @@ var testingObj = {
 };
 
 
-testingObj.loadNoteToForm();
+testingObj.loadNoteToForm("21b70263-ccd7-492f-b70f-1b4291e89c40");

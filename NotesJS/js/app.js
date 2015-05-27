@@ -15,7 +15,7 @@ var app = {
     },
     
     // Map the local storage and populate the table with the data
-    mapLocalStorageWithTable: function ()
+    mapLocalStorageWithTable: function()
     {
         app.noteCollection = new NoteCollection();
         app.noteCollection.init();        
@@ -32,4 +32,21 @@ var app = {
 // Define a global jQuery function
 jQuery.fn.tagName = function () {
     return this.prop("tagName").toLowerCase();;
+};
+
+// Adds a customised funtion to jQuery which is charge of generating a (key, value) pair object
+$.fn.serialiseObject = function () {
+    var o = {};
+    var a = this.serializeArray();
+    $.each(a, function () {
+        if (o[this.name] !== undefined) {
+            if (!o[this.name].push) {
+                o[this.name] = [o[this.name]];
+            }
+            o[this.name].push(this.value || "");
+        } else {
+            o[this.name] = this.value || "";
+        }
+    });
+    return o;
 };
