@@ -8,7 +8,7 @@ var testingObj = {
         // Use the key passed as parameter, if its empty, use the one from the last serialisation
         app.myCurrentNote.currentWorkingObject = app.myCurrentNote.deserialize(uid || lastGuid);
         // Log the guid the console
-        Console.log("Deserialisation was done with the following key:" + (uid || lastGuid));
+        console.log('Deserialisation was done with the following key:' + (uid || lastGuid));
         // Populate the form with the deserilised data
         app.myCurrentNote.populateForm();
 
@@ -27,4 +27,4 @@ var testingObj = {
 };
 
 
-testingObj.loadNoteToForm();
+//testingObj.loadNoteToForm();
