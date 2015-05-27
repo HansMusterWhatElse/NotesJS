@@ -58,11 +58,12 @@ function Note() {
     };
 
     this.populateForm = function () {
+        var node = this;
         if (this.currentWorkingObject.serializedFormData) {
             var elem = helperFn.splitQueryString(this.currentWorkingObject.serializedFormData);
             $.each(elem, function (key, value) {
                 var decodedValue = helperFn.decodeString(value);
-                setFormValue(key, decodedValue);
+                node.setFormValue(key, decodedValue);
             });
         }
     };
@@ -136,34 +137,36 @@ function NoteCollection() {
         $.each(this.collection, function (index, obj) {
             var deserializedObj = helperFn.splitQueryString(obj.serializedFormData);
             $.each(deserializedObj, function (key, value) {
-                deserializedObj[key] = nodeCol.getColValue(key, value);
+                deserializedObj[key] = nodeCol.getColValue(key, helperFn.decodeString(value));
             });
-           // var html = app.template(deserializedObj);
-           // fTemplate.clone().appendTo("#row" + (row + 1)).children()
-           //.filter("img").attr("src", "product1.jpg").end()
-           //.filter("label").attr("for", fNames[i]).text(fNames[i]).end()
-           //.filter("input").attr({
-           //    name: fNames[i],
-           //    value: 0
-           // });
 
-           // <!-- HTML templates -->
-           // <script id="flowerTmpl" type="text/x-handlebars-template">
-           // {{#each flowers}}
-           // <div class="dcell">
-           // <img src="product1.jpg" />
-           // <label for="{{product}}">{{name}}:</label>
-           // <input name="{{product}}"
-           //    data-price="{{price}}"
-           //    data-stock="{{stock}}"
-           //    value={{stock}}
-           //    min="0"
-           //    max="{{stock}}"
-           //    required />
-           // </div>
+            var a = 3;
+            // var html = app.template(deserializedObj);
+            // fTemplate.clone().appendTo("#row" + (row + 1)).children()
+            //.filter("img").attr("src", "product1.jpg").end()
+            //.filter("label").attr("for", fNames[i]).text(fNames[i]).end()
+            //.filter("input").attr({
+            //    name: fNames[i],
+            //    value: 0
+            // });
+
+            // <!-- HTML templates -->
+            // <script id="flowerTmpl" type="text/x-handlebars-template">
+            // {{#each flowers}}
+            // <div class="dcell">
+            // <img src="product1.jpg" />
+            // <label for="{{product}}">{{name}}:</label>
+            // <input name="{{product}}"
+            //    data-price="{{price}}"
+            //    data-stock="{{stock}}"
+            //    value={{stock}}
+            //    min="0"
+            //    max="{{stock}}"
+            //    required />
+            // </div>
             //            {{/each}}$
 
-            var templResult = $("#flowerTmpl").template(data).filter("*");
+            //var templResult = $("#flowerTmpl").template(data).filter("*");
         });
     };
 

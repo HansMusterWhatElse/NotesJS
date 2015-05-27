@@ -24,10 +24,9 @@ var app = {
     // Initialise a new node object
     createNote : function(isDebugging) {
         app.myCurrentNote = new Note();
-        app.myCurrentNote.debugging = isDebugging || false;
+        app.myCurrentNote.debugging = isDebugging || true;
         return app.myCurrentNote;
-    }
-    
+    }   
 };
 
 // Define a global jQuery function
