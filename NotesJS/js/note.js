@@ -138,7 +138,32 @@ function NoteCollection() {
             $.each(deserializedObj, function (key, value) {
                 deserializedObj[key] = nodeCol.getColValue(key, value);
             });
-            var html = app.template(deserializedObj);
+           // var html = app.template(deserializedObj);
+           // fTemplate.clone().appendTo("#row" + (row + 1)).children()
+           //.filter("img").attr("src", "product1.jpg").end()
+           //.filter("label").attr("for", fNames[i]).text(fNames[i]).end()
+           //.filter("input").attr({
+           //    name: fNames[i],
+           //    value: 0
+           // });
+
+           // <!-- HTML templates -->
+           // <script id="flowerTmpl" type="text/x-handlebars-template">
+           // {{#each flowers}}
+           // <div class="dcell">
+           // <img src="product1.jpg" />
+           // <label for="{{product}}">{{name}}:</label>
+           // <input name="{{product}}"
+           //    data-price="{{price}}"
+           //    data-stock="{{stock}}"
+           //    value={{stock}}
+           //    min="0"
+           //    max="{{stock}}"
+           //    required />
+           // </div>
+            //            {{/each}}$
+
+            var templResult = $("#flowerTmpl").template(data).filter("*");
         });
     };
 
