@@ -90,6 +90,7 @@
   <ItemGroup>
     <Content Include="js\app.js" />
     <Content Include="js\event-handlers.js" />
+    <Content Include="js\note-collection.js" />
     <Content Include="js\testing.js" />
     <Content Include="packages.config" />
     <Content Include="Content\fonts\glyphicons-halflings-regular.woff" />

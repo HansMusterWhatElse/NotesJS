@@ -1,63 +1,106 @@
 ﻿function NoteObject(guid) {
     this.guid = guid;
+    this.attachmentIndex = 0; // "href" value to identify the item in the <output> element
     this.attachements = [];
     this.formDataObj = {};
 };
 
 function Note() {
-    this.output = [];
-    this.debugging = false;
-    this.currentWorkingObject = new NoteObject(helperFn.createGuid());
-    this.addAttachement = function(files) {
+    var _debugging = false;
+    var _noteObj = new NoteObject(helperFn.createGuid());
+
+    // Getter + Setter
+    this.getNoteObj = function () {
+        return _noteObj;
+    }
+    this.setNoteObj = function (value) {
+        _noteObj = value;
+    }
+    this.getDebugging = function () {
+        return _debugging;
+    }
+    this.setDebugging = function (value) {
+        _debugging = value;
+    }
+
+    this.addAttachement = function (files) {
         // Display a message concerning the selected files & store the file in the local storage
-        for (var i = 0, f; f === files[i]; i++) {
-            var fileReader = new FileReader();
-            fileReader.onload = (function(file, curObject) {
-                return function(evt) {
+        for (var i = 0, f; f = files[i]; i++) {
+            var fileReader = new FileReader(),
+                nextIndex = this.getNextFreeIndex();  // next index in the attachement object array => slicing elements lowers the index number
+            fileMetaData = {
+                index: _noteObj.attachmentIndex++,
+                name: f.name, // escape
+                type: f.type,
+                size: f.size,
+                lastMod: helperFn.createAndFormatMomentObj(f.lastModifiedDate, 'LL')
+            };
+            this.addDataToAttachementObj(nextIndex, fileMetaData);
+
+            fileReader.onload = (function (file, obj) {
+                return function (evt) {
                     // Read out file contents as a data URL => result => base64 encoded data string
                     var base64File = evt.target.result;
-                    curObject.attachements.push(base64File);
-                }
-            })(f, this.currentWorkingObject);
+                    obj["note"].addDataToAttachementObj(obj["index"], { data: base64File })
+                };
+            })(f, { note: this, index: nextIndex }); // hack => fileReader.onload() takes just one additional parameter for the closure function, thus the workaround with the object 
+                                                     // it also seems that the argument e.g index has to be passed explicit and can't be accessed (different value) via this 
 
-            // Async
+            // Async => reading file
             fileReader.readAsDataURL(f);
-
-            // Display
-            this.displayOutputMessage(f);
         }
-        $('#upload-output').html('<ul>' + this.output.join('') + '</ul>');
+
+        this.writeAttachementsToOutput();
     };
 
-    this.displayOutputMessage = function(f) {
-        this.output.push('<li><strong>',
-            escape(f.name),
-            '</strong> (',
-            f.type || 'n/a', ') - ',
-            f.size, ' bytes, last modified: ',
-            f.lastModifiedDate.toLocaleDateString(), '</li>');
+    this.writeAttachementsToOutput = function () {
+        var html = app.outputTemplate(_noteObj.attachements);
+        $('.upload-output').html(html);
     };
 
-    this.serialise = function() {
-        this.currentWorkingObject.formDataObj = $("#note-form").serialiseObject();
-        var jsonString = JSON.stringify(this.currentWorkingObject);
+    this.removeAttachement = function (index) {
+        // remove the object from the array with property index == index (
+        for (var i = 0; i < _noteObj.attachements.length; i++) {
+            if (_noteObj.attachements[i].index === index) {
+                _noteObj.attachements.splice(i, 1);
+            }
+        }
+    }
+
+    // Gets the next free index value for the attachement object
+    this.getNextFreeIndex = function () {
+        return _noteObj.attachements.length;
+    }
+
+    this.addDataToAttachementObj = function (index, obj) {
+        // Add additional file related data to the attachement object array
+        if (_noteObj.attachements[index]) {
+            $.extend(true, _noteObj.attachements[index], obj);
+        } else {
+            _noteObj.attachements[index] = obj
+        }
+    };
+
+    this.serialise = function () {
+        _noteObj.formDataObj = $("#note-form").serialiseObject();
+        var jsonString = JSON.stringify(_noteObj);
         try {
-            localStorage.setItem(this.currentWorkingObject.guid, jsonString);
-            if (this.debugging) {
+            localStorage.setItem(_noteObj.guid, jsonString);
+            if (this._debugging) {
                 // Set the guid for the testing environment to the last serialised guid => localstorage
-                testingObj.storeGuid(this.currentWorkingObject.guid);
+                testingObj.storeGuid(_noteObj.guid);
                 console.log(jsonString);
             }
-            return this.currentWorkingObject;
+            return _noteObj;
         } catch (e) {
             console.log("Saving item to storage failed: " + e);
         }
     };
 
-    this.deserialise = function(guid) {
+    this.deserialise = function (guid) {
         try {
             var serialisedObj = JSON.parse(localStorage.getItem(guid));
-            if (this.debugging) {
+            if (this._debugging) {
                 // Set the guid for the testing environment to the last serialised guid => localstorage
                 testingObj.storeGuid(guid);
                 console.log(serialisedObj);
@@ -68,138 +111,57 @@ function Note() {
         }
     };
 
-    this.populateForm = function() {
+    this.populateForm = function () {
+        // Form data
         var node = this;
-        if (this.currentWorkingObject.serialisedFormData) {
-            var elem = helperFn.splitQueryString(this.currentWorkingObject.serialisedFormData);
-            $.each(elem, function(key, value) {
-                var decodedValue = helperFn.decodeString(value);
-                node.setFormValue(key, decodedValue);
+        if (_noteObj.formDataObj) {
+            $.each(_noteObj.formDataObj, function (key, value) {
+                node.setFormValue(key, value);
             });
         }
+
+        // Attachements
+        this.writeAttachementsToOutput();
     };
 
     // Clear the form with an empty string
-    this.clearForm = function() {
-        if (this.currentWorkingObject.formDataObj) {
+    this.clearForm = function () {
+        if (_noteObj.formDataObj) {
             var nodeObj = this;
-            $.each(this.currentWorkingObject.formDataObj, function(key) {
+            $.each(_noteObj.formDataObj, function (key) {
                 nodeObj.setFormValue(key, "");
             });
         }
     };
 
-    this.setFormValue = function(key, value) {
+    this.setFormValue = function (key, value) {
         var $res = $("#note-form").find("[name='" + key + "']");
         var isRadio = $res.is('input:radio');
-        if ($res.length === 1 || isRadio) {
+        if ($res.length === 1 || isRadio) { // check for duplicates
             switch ($res.tagName()) {
-            case "input":
-                // Input radio button
-                if (isRadio) {
-                    // checks for "high", "medium", "low" => if the value variable is empty => set to unchecked
-                    value ? $("input[name='" + key + "'][value='" + value + "']").attr('checked', 'checked') :
-                        $("input[name='" + key + "'][value='" + value + "']").attr('checked', false);
-                } else {
-                    // Input regular
+                case "input":
+                    // Input radio button
+                    if (isRadio) {
+                        // checks for "high", "medium", "low" => if the value variable is empty => set to unchecked
+                        value ? $("input[name='" + key + "'][value='" + value + "']").attr('checked', 'checked') :
+                            $("input[name='" + key + "'][value='" + value + "']").attr('checked', false);
+                    } else {
+                        // Input regular
+                        $res.val(value);
+                    }
+                    break;
+                case "textarea":
                     $res.val(value);
-                }
-                break;
-            case "textarea":
-                $res.val(value);
-                break;
-            case "button":
-                $res.html(!helperFn.isEmpty(value) ? value : "Status");
-                break;
-            default:
-                console.log("Mapping for the deserialisation process failed. Key: " + key + " Value: " + value);
-                break;
+                    break;
+                case "button":
+                    $res.html(!helperFn.isEmpty(value) ? value : "Status");
+                    break;
+                default:
+                    console.log("Mapping for the deserialisation process failed. Key: " + key + " Value: " + value);
+                    break;
             }
         } else {
             console.log("Duplicate entries for Key: " + key + " Value: " + value);
-        }
-    }; 
-}
-
-function NoteCollection() {
-    this.noteObjectCollection = [];
-    this.init = function () {
-        this.mapLocalStorage();
-        this.populateTable();
-    };
-
-    // Retrieves all the data from the local storage which use a guid as key
-    this.mapLocalStorage = function () {
-        for (var i = 0, len = localStorage.length; i < len; i++) {
-            var key = localStorage.key(i);
-            if (key.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/g)) {
-                var note = new Note();
-                note = note.deserialise(key);
-                if (note) {
-                    this.noteObjectCollection.push(note);
-                }
-            }
-        }
-    };
-
-    // Populates the table with the notes from the local storage => passes the deserialised object to the handlebar framework
-    this.populateTable = function () {
-       
-           
-            var html = app.template(this.noteObjectCollection);
-            var test = 5;
-            // implement => this.getColValue helpers in handlebarjs 
-            // http://handlebarsjs.com/expressions.html
-
-
-            // fTemplate.clone().appendTo("#row" + (row + 1)).children()
-            //.filter("img").attr("src", "product1.jpg").end()
-            //.filter("label").attr("for", fNames[i]).text(fNames[i]).end()
-            //.filter("input").attr({
-            //    name: fNames[i],
-            //    value: 0
-            // });
-
-            // <!-- HTML templates -->
-            // <script id="flowerTmpl" type="text/x-handlebars-template">
-            // {{#each flowers}}
-            // <div class="dcell">
-            // <img src="product1.jpg" />
-            // <label for="{{product}}">{{name}}:</label>
-            // <input name="{{product}}"
-            //    data-price="{{price}}"
-            //    data-stock="{{stock}}"
-            //    value={{stock}}
-            //    min="0"
-            //    max="{{stock}}"
-            //    required />
-            // </div>
-            //            {{/each}}$
-
-            //var templResult = $("#flowerTmpl").template(data).filter("*");
-    };
-
-    // Sets the column values for the <td> elements in the note collection table
-    this.getColValue = function (key, value) {
-        switch (key) {
-            case "status":
-                if (value !== "Status" && !helperFn.isEmpty(value)) { // Table display => icon
-                    return value.match(/:\s*(\w+)/g)[0] === "Pending" ?
-                        '<span class="glyphicon glyphicon-ok icon"></span>' :
-                        '<span class="glyphicon glyphicon-remove icon"></span>';
-                } else {
-                    return "Status"; // Button value
-                }
-            case "duedate":
-                return !helperFn.isEmpty(value) ? value.match(/([^\s]+)/)[0] : "";
-            case "optpriority":
-                return value === "high" ? '<span class="glyphicon glyphicon-circle-arrow-up icon">' :
-                    value === "medium" ? '<span class="glyphicon glyphicon-circle-arrow-left icon">' :
-                    '<span class="glyphicon glyphicon-circle-arrow-down icon">';
-            case "creationdate":
-                return new Date(value);
-            default:
-                return value;
         }
     };
 };

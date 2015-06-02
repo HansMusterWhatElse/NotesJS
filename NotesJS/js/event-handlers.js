@@ -44,8 +44,7 @@
     // Save form button
     $("button.btn.btn-default[type='submit'").on('click', function (e) {
         // Pass a serialised object and clear the form
-        app.myCurrentNote.serialise();
-        app.myCurrentNote.clearForm();    
+        app.saveForm();
         // Prevents the page from reloading and thus another unnecessary initilatisation of app.init()
         e.preventDefault();
         $('#createNoteView').hide('slow');
@@ -58,17 +57,50 @@
         $('#creationdate').val(new Date());
         $('#createNoteView').toggle('slow', function () {
             if ($(this).is(':visible')) {
-                $("#note-form").find("input[name='guid'][type='hidden']").val(app.myCurrentNote.currentWorkingObject.guid);
+                // Set the guid to the hidden field
+                $("#note-form").find("input[name='guid'][type='hidden']").val(app.myCurrentNote.getNoteObj().guid);
             }
         });
     });
 
     // Form : Status
     // Updates the button text regarding the status "Pending" or "Closed" and consequently sets a hidden field with the value
-    $(".dropdown-menu").find('a').on("click", function (event) {
+    $(".dropdown-menu").find('a').on("click", function (e) {
         var val = $(this).text();
         $('.dropdown-toggle').text("Status: " + val);
         $('#status').val(val);
+    });
+
+
+    // Remove an attachement from the form output
+    $('.upload-output').on('click', 'a', function (e) {
+        var index = $(this).attr('href');
+        $(this).parent().remove()
+        e.preventDefault();
+        app.myCurrentNote.removeAttachement(Number(index));
+    });
+
+    // Event handler for the edit / delete action from the table
+    $('.note-table-body').on('click', 'a', function (e) {
+        var guid = $(this).parent().siblings('.note-guid').text(),
+            iconClass = $(this).children().attr('class')
+
+        if (/-pencil$/g.test(iconClass)) {
+            app.loadNoteToForm(guid);
+            $('#createNoteView').toggle('slow');
+        } else if (/-trash$/g.test(iconClass)) {
+            app.removeNote(guid);
+            $(this).closest('tr').remove();
+            if ($('#createNoteView').is(':visible')) {
+                $('#createNoteView').toggle('slow');
+            }
+        }
+        e.preventDefault();
+    });
+
+    // Event handler for the sorting actions
+    $('.note-table-header').on('click', 'a', function (e) {
+        app.updateTable();
     });
 });
 

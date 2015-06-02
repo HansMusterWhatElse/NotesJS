@@ -12,16 +12,12 @@
     ----------------------
     My ToDo's
     ----------------------
-
-    0) Replace plain HTML with jQuery Objects
-    1) Change color depening on the due date (red, orange, green)
+    1) this.populateForm() => uses the serialised data => new architecture
+        => serialise the whole Note object (adnimation Index etc.)
+        => edit / delete buttons for <tr> elements
     2) Show all or just pending Notes => hack near the Status Column?
     3) Export function (xml/json)
     4) Autosave function
-    5) File upload function (add icons (file, image, etc.) to the output)
-    5.1) If allready an existing attachement => add
-    5.2) Add remove button for a file
-    6) Move note.init() to a more suitable location
     7) Form validation
     8) Note collection table => add guid to the <th> and hide it
 
@@ -31,6 +27,9 @@
 
     1) Change status in form => auto scroll to the top
     2) Git => check in => different user
+    3) fileReader.onload
+        => just one closure variable?
+        => this => counter gets updated => has to be passed explicitly?
 
     -->
 </head>
@@ -97,7 +96,7 @@
                     <div class="form-group">
                         <label>Due Date:</label>
                         <div class="input-group date" id="datetimepicker">
-                            <input name="duedate" type="datetime" class="form-control"/>
+                            <input name="duedate" type="datetime" class="form-control" />
                             <span class="input-group-addon">
                                 <span class="glyphicon glyphicon-calendar"></span>
                             </span>
@@ -121,7 +120,7 @@
                     <div form-group>
                         <label>Attachements:</label>
                         <div name="upload-drop-zone" class="upload-drop-zone">Drag & Drop your attachements here</div>
-                        <output id="upload-output"></output>
+                        <output class="upload-output"></output>
                     </div>
                     <button type="submit" class="btn btn-default">Save</button>
                 </form>
@@ -135,67 +134,48 @@
                 Notes
             </div>
             <div class="panel-body">
-                <table class="table">
-                    <thead>
-                    <tr>
-                        <th>Status</th>
-                        <th>Due</th>
-                        <th>Creation</th>
-                        <th>Importance</th>
-                        <th>Description</th>
-                        <th>Actions</th>
-                    </tr>
+                <table class="table note-table">
+                    <thead class="note-table-header">
+                        <tr>
+                            <th>
+                                Status
+                                <a href="#">
+                                    <span class="glyphicon glyphicon-chevron-down"></span>
+                                </a>
+                            </th>
+                            <th>
+                                Due
+                                <a href="#">
+                                    <span class="glyphicon glyphicon-chevron-down"></span>
+                                </a>
+                            </th>
+                            <th>
+                                Creation
+                                <a href="#">
+                                    <span class="glyphicon glyphicon-chevron-down"></span>
+                                </a>
+                            </th>
+                            <th>
+                                Importance
+                                <a href="#">
+                                    <span class="glyphicon glyphicon-chevron-down"></span>
+                                </a>
+                            </th>
+                            <th>
+                                Description
+                                <a href="#">
+                                    <span class="glyphicon glyphicon-chevron-down"></span>
+                                </a>
+                            </th>
+                            <th>
+                                Actions
+                                <a href="#">
+                                    <span class="glyphicon glyphicon-chevron-down"></span>
+                                </a>
+                            </th>
+                        </tr>
                     </thead>
-                    <tbody>
-                        <tr>
-                            <td>GUID1</td>
-                            <td><span class="glyphicon glyphicon-ok icon"></span></td>
-                            <td>10.02.2016</td>
-                            <td>10.02.2016</td>
-                            <td>Icon1</td>
-                            <td>In post mean shot ye. There out her child sir his lived. Design at uneasy me seaso</td>
-                            <td>
-                                <a href="#" class="icon">
-                                    <span class="glyphicon glyphicon-pencil"></span>
-                                </a>
-                                <a href="#" class="icon">
-                                    <span class="glyphicon glyphicon-trash"></span>
-                                </a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>GUID2</td>
-                            <td><span class="glyphicon glyphicon-ok icon"></span></td>
-                            <td>10.02.2016</td>
-                            <td>10.02.2016</td>
-                            <td>Icon2</td>
-                            <td>zealously his shy own belonging. Always length letter adieus add number moment she. Promise few compass six several old office</td>
-                            <td>
-                                <a href="#" class="icon">
-                                    <span class="glyphicon glyphicon-pencil"></span>
-                                </a>
-                                <a href="#" class="icon">
-                                    <span class="glyphicon glyphicon-trash"></span>
-                                </a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>GUID3</td>
-                            <td><span class="glyphicon glyphicon-remove icon"></span></td>
-                            <td>10.02.2016</td>
-                            <td>10.02.2016</td>
-                            <td>Icon3</td>
-                            <td>interested. Described deficient applauded consisted my me do. Passed edward two talent effect seemed engage six</td>
-                            <td>
-                                <a href="#" class="icon">
-                                    <span class="glyphicon glyphicon-pencil"></span>
-                                </a>
-                                <a href="#" class="icon">
-                                    <span class="glyphicon glyphicon-trash"></span>
-                                </a>
-                            </td>
-                        </tr>
-                    </tbody>
+                    <tbody class="note-table-body"></tbody>
                 </table>
             </div>
         </div>
@@ -210,21 +190,25 @@
     <script src="Scripts/moment.min.js"></script>
     <script src="Scripts/bootstrap-datetimepicker.min.js"></script>
     <script src="Scripts/handlebars.min.js"></script>
+
     <!-- Customised JavaScript-->
     <script src="js/helper-functions.js"></script>
     <script src="js/event-handlers.js"></script>
     <script src="js/app.js"></script>
     <script src="js/note.js"></script>
+    <script src="js/note-collection.js"></script>
     <script src="js/testing.js"></script>
 
-    <!-- Handlebar Template -->
+    <!-- Handlebar Templates -->
+
+    <!-- Table row -->
     <script id="note-row-template" type="text/x-handlebars-template">
-    {{#each this}}
+        {{#each this}}
         <tr class="noteTableRow">
-            <td>{{this.formDataObj.guid}}</td>
+            <td class="note-guid">{{this.formDataObj.guid}}</td>
             <td>{{{this.formDataObj.status}}}</td>
-            <td>{{this.formDataObj.duedate}}</td>
-            <td>{{this.formDataObj.creationdate}}</td>
+            <td>{{{formatDate "duedate" this}}}</td>
+            <td>{{{formatDate "creationdate" this}}}</td>
             <td>{{{this.formDataObj.optpriority}}}</td>
             <td>{{this.formDataObj.desc}}</td>
             <td>
@@ -236,7 +220,21 @@
                 </a>
             </td>
         </tr>
-    {{/each}}
-</script>
+        {{/each}}
+    </script>
+
+    <!-- Attachement output -->
+    <script id="attachement-li-template" type="text/x-handlebars-template">
+        <ul>
+            {{#each this}}
+            <li>
+                <a href="{{this.index}}">
+                    <span class="glyphicon glyphicon-file"></span>
+                </a>
+                <strong>{{this.name}}</strong> {{this.type}} - {{this.size}} bytes, last modified: {{this.lastMod}}
+            </li>
+            {{/each}}
+        </ul>
+    </script>
 </body>
 </html>

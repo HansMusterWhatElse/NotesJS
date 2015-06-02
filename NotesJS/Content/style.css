@@ -59,3 +59,16 @@ span.icon  {
 td:nth-child(1) {
    display: none;
 }
+
+.duedate-green {
+    color : green;
+
+}
+
+.duedate-orange {
+    color : orangered;
+}
+
+.duedate-red {
+    color : red;
+}
