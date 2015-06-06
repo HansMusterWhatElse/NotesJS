@@ -47,8 +47,8 @@ var app = {
         app.mapLocalStorageWithTable();
     },
 
-    updateTable : function(){
-        app.noteCollection.filterCollection();
+    filterTable : function(){
+        app.noteCollection.filter();
     },
 
     initTemplates : function(){

@@ -58,19 +58,53 @@
         };
 
         // Sorting functiom
-        this.filterCollection = function (search, isAsc, limit, sort) {
-            sort = "Due";
-            isAsc = true;
-            var self = this;
+        this.filter = function (search, isAsc, limit, sort) {
 
-            // Default sorting is "Status"
-            sortCollection();
+            var tempRes = [];
+            var reg = new RegExp(search, 'g');
 
-            function sortCollection() {
-                self.noteObjectCollection.sort(function (a, b) {
-                    var i = 4;
+            // Search (Search)
+            if (search) {
+                for (var i = 0; i < _noteObjectCollection.length; i++) {
+                    var formData = _noteObjectCollection[i].formDataObj;
+                    if (formData) {
+                        for (key in formData) {
+                            var d = formData[key].match(reg);
+                            if (formData[key].match(reg)) {
+                                tempRes.push(_noteObjectCollection[i]);
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Sorting (IsAsc, Sort) 
+            if (sort && tempRes.length > 0) {
+                tempRes.sort(function (a, b) {
+                    var sortProp = sort ? sort : "Status";
+                    var propA = a.formDataObj[sortProp];
+                    var propB = b.formDataObj[sortProp];
+
+                    if (isAsc) {
+                        if (propA < propB)
+                            return -1;
+                        if (propA > propB)
+                            return 1;
+                        return 0;
+                    } else {
+                        if (propA > propB)
+                            return -1;
+                        if (propA < propB)
+                            return 1;
+                        return 0;
+                    }
                 });
-            };
+            }
+
+            // Set the sorted & filtered array => deletes the other entries!
+            _noteObjectCollection = tempRes;
+            this.populateTable();
+
         };
     };
 
