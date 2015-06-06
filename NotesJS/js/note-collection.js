@@ -1,6 +1,8 @@
 ﻿var NoteCollection = NoteCollection || (function (window, document, undefined) {
     function NoteCollectionFn() {
+        // Retrieves the sorted collection, unless it is empty
         var _noteObjectCollection = [];
+        var __noteObjectCollectionSorted = [];
 
         this.init = function () {
             this.mapLocalStorage();
@@ -13,6 +15,10 @@
         }
         this.setCol = function (value) {
             _noteObjectCollection = value;
+        }
+
+        this.getSortedCol = function () {
+            return __noteObjectCollectionSorted;
         }
 
         // Retrieves all the data from the local storage which use a guid as key
@@ -53,7 +59,9 @@
 
         // Populates the table with the notes from the local storage => passes the deserialised object to the handlebar framework
         this.populateTable = function () {
-            var html = app.noteTemplate(_noteObjectCollection);
+            
+            var k = __noteObjectCollectionSorted || _noteObjectCollection;
+            var html = app.noteTemplate(__noteObjectCollectionSorted.length > 0 ? __noteObjectCollectionSorted : _noteObjectCollection);
             $('.note-table-body').html(html);
         };
 
@@ -81,6 +89,7 @@
             // Sorting (IsAsc, Sort) 
             if (sort && tempRes.length > 0) {
                 tempRes.sort(function (a, b) {
+                    // Default sorting property is "Status"
                     var sortProp = sort ? sort : "Status";
                     var propA = a.formDataObj[sortProp];
                     var propB = b.formDataObj[sortProp];
@@ -102,7 +111,7 @@
             }
 
             // Set the sorted & filtered array => deletes the other entries!
-            _noteObjectCollection = tempRes;
+            __noteObjectCollectionSorted = tempRes;
             this.populateTable();
 
         };

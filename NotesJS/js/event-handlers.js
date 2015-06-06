@@ -100,7 +100,7 @@
 
     // Event handler for the sorting actions
     $('.note-table-header').on('click', 'a', function (e) {
-        app.filterTable();
+        app.filterTable("hi", true, 20, "Importance");
     });
 });
 
